@@ -1,0 +1,191 @@
+drop table EligableCandidates;
+create table EligableCandidates (
+	emp_code number(8)PRIMARY KEY, emp_name varchar2(50), experience number(5,3));
+			 
+
+DECLARE
+	emp_code staff_master.staff_code%TYPE;
+	emp_name staff_master.staff_name%TYPE; 
+	experience EligableCandidates.experience%TYPE;
+
+	minExp EligableCandidates.experience%TYPE :=15;
+
+	CURSOR exp IS 
+	SELECT staff_code, staff_name, trunc(( (sysdate-hiredate) / 365),1) FROM staff_master;
+
+BEGIN
+	IF NOT exp%ISOPEN THEN
+		OPEN exp;
+	END IF;
+
+	LOOP
+	FETCH exp INTO emp_code, emp_name, experience;
+	EXIT WHEN exp%NOTFOUND;
+	
+	IF experience > minExp THEN 
+	insert into EligableCandidates values (emp_code, emp_name, experience);
+	END IF;
+
+	END LOOP;
+	close exp;
+END;
+/
+
+********************************************************************
+
+PL/SQL procedure successfully completed.
+
+SQL> select * from EligableCandidates;
+
+  EMP_CODE EMP_NAME                                           EXPERIENCE
+---------- -------------------------------------------------- ----------
+    100002 Shyam                                                    15.8
+    100003 Mohan                                                    15.9
+    100004 Anil                                                     16.8
+    100005 John                                                     16.9
+    100006 Allen                                                    16.6
+    100007 Smith                                                    15.8
+    100010 Ram                                                      15.9
+
+
+***********************************************************************************
+drop table Performance;
+create table Performance(
+	student_code number(6) primary key,
+	totalmarks number(4) not null);
+
+DECLARE 
+	total number(4);
+	stu_rec student_marks%rowtype;
+	CURSOR stu_cur IS select * from student_marks where student_year=2010;
+
+BEGIN
+	IF NOT stu_cur %ISOPEN THEN
+		OPEN stu_cur;
+	END IF;
+
+	LOOP
+	FETCH stu_cur INTO stu_rec;
+
+	EXIT WHEN stu_cur %NOTFOUND;
+
+	total := stu_rec.subject1 + stu_rec.subject2 + stu_rec.subject3;
+
+	IF total > 220 THEN
+		INSERT INTO Performance values(stu_rec.student_code, total);
+	END IF;
+
+
+	END LOOP;
+	CLOSE stu_cur;
+	
+END;
+/
+
+*****************************************************************************
+DECLARE
+	v_design_code number(3) 	:= 107;
+	v_designation varchar2(50) 	:= 'clerk';
+
+	v2_design_code number(3);
+	v2_designation varchar2(50) ;
+
+	Err_Num number;
+	Err_Msg varchar2(50);
+	record_already_exists EXCEPTION;
+
+BEGIN
+	SELECT design_code, design_name 
+	into v2_design_code, v2_designation 
+	FROM designation_master 
+	WHERE design_code = v_design_code;
+	
+	IF v_design_code = v2_design_code  THEN
+		RAISE record_already_exists;
+	END IF;
+
+
+EXCEPTION
+	WHEN no_data_found THEN
+        	insert into designation_master  values (v_design_code,v_designation);
+
+	WHEN record_already_exists THEN
+		dbms_output.put_line('Insert Failed as record already exists');
+
+	WHEN OTHERS THEN
+                Err_Num := SQLCODE;
+                Err_Msg := SUBSTR( SQLERRM, 1, 100);
+                dbms_output.put_line(err_num ||' ' || err_msg );
+END;
+/
+
+**************Procedures and functions*************************************************************
+
+
+CREATE OR REPLACE PROCEDURE greetings(name in varchar)
+as
+BEGIN
+	dbms_output.put_line('Hello ' || name);
+END greetings;
+/
+
+BEGIN
+	greetings('Babitha');
+END;
+/
+
+CREATE or REPLACE procedure addition(num1 in number, num2 in number, result out number)
+IS
+BEGIN
+	result := num1+num2;
+END addition;
+/
+
+DECLARE
+	n1 number := 12;
+	n2 number := 5;
+	sum1 number:=0;
+BEGIN
+	addition(n1,n2,sum1);
+	dbms_output.put_line('Addition result: ' || sum1);
+END;
+/
+
+create or replace function getMax
+(num1 in number, num2 in number)
+return number
+is 
+	maxValue number;
+
+begin
+	if(num1 > num2 ) then
+		maxValue := num1;
+	else 
+		maxValue := num2;
+	END IF;
+
+	return maxValue;
+END;
+/
+
+DECLARE
+	maxValue number;
+begin
+	maxValue := getMax(12,45);
+	dbms_output.put_line( maxValue );
+END;
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+

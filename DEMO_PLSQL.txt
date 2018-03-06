@@ -1,0 +1,267 @@
+BEGIN
+	null;
+END;
+/
+
+########################################################
+DECLARE
+	message varchar2(20) := 'Hello world';
+	V_Sample1 NUMBER(2);
+	V_Sample2 CONSTANT NUMBER(2) ;
+	V_Sample3 NUMBER(2) NOT NULL ;
+	V_Sample4 NUMBER(2) := 50;
+	V_Sample5 NUMBER(2) DEFAULT 25;
+	
+BEGIN
+	dbms_output.put_line(message);
+END;
+/
+
+#########################################################
+DECLARE
+	message varchar2(20);
+
+BEGIN
+	message := 'Hello world';
+	dbms_output.put_line(message);
+END;
+/
+
+###########################################################
+DECLARE 
+e_id number(8) not null := 1234;
+e_name varchar2(20) default 'unknown';
+e_salary number(7,2) := 12000.50;
+BEGIN
+
+	e_name := 'Peter';
+
+	dbms_output.put_line('e_id= ' || e_id); -- || used to indicate only one output displayed by inbuilt function put_line 
+	dbms_output.put_line('e_name= ' || e_name);
+	dbms_output.put_line('e_salary= ' || e_salary);
+END;
+/
+
+#############################################################
+DECLARE 
+	num1 CONSTANT number(8) := 56;
+	num2 CONSTANT number(8) := 44;
+	result number(8,4);
+BEGIN
+
+	result := num1+num2;
+	dbms_output.put_line('Addition of	' || num1 || ' + ' || num2 || ' = ' || result);
+
+	result := num1-num2;
+	dbms_output.put_line('Subtraction of	' || num1 || ' - ' || num2 || ' = ' || result);
+
+	result := num1/num2;
+	dbms_output.put_line('Division of	' || num1 || ' / ' || num2 || ' = ' || result);
+	
+	result := num1*num2;
+	dbms_output.put_line('Product of	' || num1 || ' * ' || num2 || ' = ' || result);
+
+END;
+/
+
+##################################################################
+DECLARE 
+	emp_code 	emp.empno%type;   --fetch from emp table datatype which is number
+	emp_name 	emp.ename%type;
+	emp_job 	emp.job%type;
+	emp_mgr 	emp.mgr%type;
+	emp_hiredate 	emp.hiredate%type;
+	emp_sal 	emp.sal%type;
+	emp_comm 	emp.comm%type;
+	emp_deptno 	emp.deptno%type;
+
+BEGIN
+
+	--emp_code 	:= 1234;
+	--emp_name 	:= 'John';
+	--emp_job 	:= 'HOD';
+	--emp_mgr 	:= 1311;
+	--emp_hiredate 	:= '12-Jan-2017';
+	--emp_sal 	:= 12000;
+	--emp_comm 	:= 10;
+
+	select empno, ename, job, mgr, hiredate, sal, comm, deptno 
+	into 
+	emp_code,emp_name, emp_job, emp_mgr, emp_hiredate, emp_sal, emp_comm, emp_deptno
+	from emp 
+	where empno=7369;
+	dbms_output.put_line(emp_code ||' '|| emp_name || ' ' || emp_job|| ' ' || emp_mgr|| ' ' || emp_hiredate|| ' ' || emp_sal|| ' ' || emp_comm|| ' ' || emp_deptno);
+
+	--dbms_output.put_line('ID: 	' || emp_code);
+	--dbms_output.put_line('Name: 	' || emp_name);
+
+
+END;
+/
+
+###########################################################
+/* using %rowtype */
+
+DECLARE emp_rec emp%rowtype;
+
+BEGIN
+
+	select * into emp_rec
+	from emp
+	where empno = 7369;
+	
+	IF emp_rec.sal < 3000
+	THEN
+
+	emp_rec.sal	:= emp_rec.sal + 500;
+
+	update emp
+	set row = emp_rec
+	where empno = 7369;
+
+	dbms_output.put_line('salary updated');
+
+	ELSE
+	dbms_output.put_line('salary not updated');
+
+	END IF;
+
+END;
+/
+
+####################################################### 
+/* records */
+
+DECLARE 
+	type book_rec_type is RECORD(
+
+		book_code number(6),
+		book_title varchar2(40),
+		book_price number(7,2)
+
+	);
+	--book_id number(3);
+	book_rec book_rec_type;
+BEGIN
+	
+	book_rec.book_code  := 2323;
+	book_rec.book_title := 'Harry Potter';
+	book_rec.book_price := 499;
+	dbms_output.put_line(book_rec.book_code);
+	dbms_output.put_line(book_rec.book_title);
+	dbms_output.put_line(book_rec.book_price);
+
+END;
+/
+##############################################################
+DECLARE 
+	radius number(5):= 12;
+	area number(7,3):= 0;
+	cir number(6,1) := 0;
+	dia number(5);
+BEGIN
+
+	dia := 2 * radius;
+	dbms_output.put_line('dia= ' || dia);
+
+	DECLARE
+		pi constant number(7,3) := 3.142;
+	BEGIN
+		area := pi * radius * radius;
+		dbms_output.put_line('area= ' || area);
+	END;
+	
+	cir := 2*radius;
+	dbms_output.put_line('cir= ' || cir);
+END;
+/
+
+#############################################################
+DECLARE 
+
+	Day varchar2(4) := TO_CHAR(sysdate,'DY');
+
+BEGIN
+	case day
+	when 'SAT' THEN
+		dbms_output.put_line('enjoy your weekend');
+
+	when 'SUN' THEN
+		dbms_output.put_line('enjoy the party');
+	ELSE
+		dbms_output.put_line('Have a nice day');
+	END case;
+END;
+/
+
+###################################################################	
+///////////if and exit
+drop table multiplicationtable;
+
+create table multiplicationtable (value number(4));
+
+DECLARE 
+	counter number 	:= 1;
+	num number(3)	:= 5;
+
+BEGIN
+
+	loop
+		insert into multiplicationtable values(num * counter);
+		counter := counter + 1;
+		
+		/*IF counter > 10 THEN
+			EXIT;
+		END IF;*/
+		EXIT WHEN counter >10;
+
+	END loop;
+END;
+/
+
+#####################################################################
+/*********for
+drop table multiplicationtable;
+
+create table multiplicationtable (value number(4));
+
+DECLARE 
+	--counter number 	:= 1;
+	num number(3)	:= 5;
+
+BEGIN
+	FOR counter in 1..10
+	loop
+		insert into multiplicationtable values(num * counter);
+		--counter := counter + 1;
+
+	END loop;
+END;
+/
+
+#########################################################################
+/****while
+drop table multiplicationtable;
+
+create table multiplicationtable (value number(4));
+
+DECLARE 
+	counter number 	:= 1;
+	num number(3)	:= 5;
+
+BEGIN
+	WHILE counter <= 10
+	loop
+		insert into multiplicationtable values(num * counter);
+		counter := counter + 1;
+
+	END loop;
+END;
+/
+
+
+
+
+
+
+
